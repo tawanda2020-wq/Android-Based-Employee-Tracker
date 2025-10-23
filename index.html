@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fresh Pro Employee Tracker</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .hero {
+            background: linear-gradient(135deg, #2C3E50 0%, #3498DB 100%);
+            color: white;
+            padding: 80px 20px 60px;
+            text-align: center;
+            margin-top: 64px;
+        }
+
+        .hero h1 {
+            font-size: 36px;
+            margin-bottom: 20px;
+        }
+
+        .hero p {
+            font-size: 18px;
+            max-width: 600px;
+            margin: 0 auto 40px;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            padding: 0 20px;
+        }
+
+        .cta-buttons .btn {
+            min-width: 200px;
+        }
+
+        .company-info {
+            max-width: 800px;
+            margin: 60px auto;
+            padding: 0 20px;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 40px;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .feature-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        footer {
+            background-color: #2C3E50;
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+            margin-top: 60px;
+        }
+
+        @media (max-width: 767px) {
+            .hero h1 {
+                font-size: 28px;
+            }
+
+            .hero p {
+                font-size: 16px;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .cta-buttons .btn {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="navbar-content">
+            <a href="index.html" class="logo">🍃 Fresh Pro Tracker</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <h1>Android-Based Employee Tracker</h1>
+        <p>Streamline field worker management with real-time GPS tracking, automated attendance logging, and
+            comprehensive analytics for Fresh Pro field marketers.</p>
+
+        <div class="cta-buttons">
+            <a href="auth.html?type=hr" class="btn btn-primary">HR Login</a>
+            <a href="auth.html?type=marketer" class="btn btn-secondary">Field Marketer Login</a>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="company-info">
+        <h2 class="text-center">System Features</h2>
+        <div class="features">
+            <div class="feature-card">
+                <div class="feature-icon">📍</div>
+                <h3>Real-Time Tracking</h3>
+                <p>Monitor field marketers' locations in real-time with GPS coordinate logging.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📊</div>
+                <h3>Analytics & Reports</h3>
+                <p>Generate comprehensive reports on attendance, hours worked, and location history.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">⏱️</div>
+                <h3>Automated Tracking</h3>
+                <p>Automatic time calculation and session management for accurate payroll.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔒</div>
+                <h3>Secure Access</h3>
+                <p>Role-based authentication system for HR and field workers.</p>
+            </div>
+        </div>
+
+        <div class="card mt-20">
+            <h2>About Fresh Pro</h2>
+            <p>Fresh Pro is a leading distributor of fresh produce and consumer goods, operating across multiple retail
+                locations in Zimbabwe. Our field marketing team plays a crucial role in promoting products and ensuring
+                brand visibility at partner stores.</p>
+            <p>This employee tracking system addresses critical challenges in managing remote field staff, ensuring
+                accountability, accurate attendance records, and fair compensation based on actual work hours.</p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <h3>Fresh Pro Employee Tracker</h3>
+     <!--   <p>Contact: +263 772426617</p>-->
+    </footer>
+</body>
+
+</html>

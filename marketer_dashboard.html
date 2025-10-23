@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marketer Dashboard - Fresh Pro Tracker</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .marketer-header {
+            background: linear-gradient(135deg, #2C3E50 0%, #27AE60 100%);
+            color: white;
+            padding: 20px;
+            margin-top: 64px;
+            text-align: center;
+        }
+
+        header p {
+            color: white;
+        }
+
+        .status-indicator {
+            position: fixed;
+            top: 74px;
+            right: 20px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 100;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .status-connected {
+            background-color: var(--secondary);
+            color: white;
+        }
+
+        .status-warning {
+            background-color: var(--warning);
+            color: white;
+        }
+
+        .time-display {
+            font-size: 48px;
+            font-weight: 700;
+            color: var(--secondary);
+            text-align: center;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+        }
+
+        .gps-coord {
+            font-family: 'Courier New', monospace;
+            font-size: 18px;
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        /* Logout button styling */
+        .btn-logout {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.3s;
+        }
+
+        .btn-logout:hover {
+            background-color: #c0392b;
+        }
+
+        @media (max-width: 767px) {
+            .status-indicator {
+                top: 64px;
+                right: 10px;
+                font-size: 12px;
+                padding: 6px 12px;
+            }
+
+            .time-display {
+                font-size: 36px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="navbar-content">
+            <a href="#" class="logo">🍃 Fresh Pro Tracker</a>
+            <button onclick="handleLogout()" class="btn-logout">Logout</button>
+        </div>
+    </nav>
+
+    <div class="status-indicator status-connected" id="status-indicator">
+        <span class="status-dot" style="background-color: white;"></span>
+        <span id="status-text">Connected and Tracking</span>
+    </div>
+
+    <header class="marketer-header">
+        <h1>Welcome <span id="marketername">Loading...</span></h1>
+        <p id="current-datetime"></p>
+    </header>
+
+    <main style="max-width: 800px; margin: 0 auto; padding: 24px;">
+        <div class="card">
+            <div style="text-align: center;">
+                <span id="activeStatus" class="badge badge-success"
+                    style="font-size: 16px; padding: 8px 20px;">Active</span>
+            </div>
+            <h2 id="shop" class="text-center" style="margin-top: 20px;">Loading...</h2>
+            <div style="border-top: 2px solid var(--background); margin: 20px 0; padding-top: 20px;">
+                <p style="text-align: center; color: #7f8c8d; margin-bottom: 8px;">Time at Location</p>
+                <div class="time-display" id="elapsed-time">00:00:00</div>
+            </div>
+            <div style="text-align: center; margin-top: 20px;">
+                <p style="color: #7f8c8d; margin-bottom: 8px;">Login Time</p>
+                <p id="loginTime" style="font-size: 20px; font-weight: 600;">Loading...</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3 class="card-header">📍 GPS Coordinates</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div>
+                    <p style="color: #7f8c8d; margin-bottom: 8px;">Latitude</p>
+                    <p class="gps-coord" id="latitude">Getting location...</p>
+                </div>
+                <div>
+                    <p style="color: #7f8c8d; margin-bottom: 8px;">Longitude</p>
+                    <p class="gps-coord" id="longitude">Getting location...</p>
+                </div>
+            </div>
+            <div
+                style="margin-top: 20px; padding: 12px; background-color: #e8f5e9; border-radius: 6px; border-left: 4px solid var(--secondary);">
+                <p id="locationMessage" style="margin: 0; color: #2e7d32;">✓ GPS tracking active</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3 class="card-header">👤 Personal Information</h3>
+            <div style="display: grid; gap: 16px;">
+                <div>
+                    <p style="color: #7f8c8d; font-size: 14px;">Full Name</p>
+                    <p id="markerterfullName" style="font-weight: 600;">Loading...</p>
+                </div>
+                <div>
+                    <p style="color: #7f8c8d; font-size: 14px;">Marketer ID</p>
+                    <p id="markerterID" style="font-weight: 600;">Loading...</p>
+                </div>
+                <div>
+                    <p style="color: #7f8c8d; font-size: 14px;">Assigned Shop</p>
+                    <p id="assignedShop" style="font-weight: 600;">Loading...</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3 class="card-header">📊 Today's Summary</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px;">
+                <div style="text-align: center;">
+                    <p style="color: #7f8c8d; font-size: 14px; margin-bottom: 8px;">Total Hours Today</p>
+                    <p id="todayHoursSpend" style="font-size: 32px; font-weight: 700; color: var(--primary);">0.0h</p>
+                </div>
+                <div style="text-align: center;">
+                    <p style="color: #7f8c8d; font-size: 14px; margin-bottom: 8px;">First Login</p>
+                    <p id="firstTimeLoginTime" style="font-size: 20px; font-weight: 600; color: var(--secondary);">--:--
+                    </p>
+                </div>
+                <div style="text-align: center;">
+                    <p style="color: #7f8c8d; font-size: 14px; margin-bottom: 8px;">Status</p>
+                    <span id="active_Status" class="badge badge-success">Active</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="alert-area"></div>
+    </main>
+
+    <script src="js/config.js"></script>
+    <script src="js/m_dash_js.js"></script>
+</body>
+
+</html>

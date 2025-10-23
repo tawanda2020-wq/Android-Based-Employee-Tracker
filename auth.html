@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authentication - Fresh Pro Tracker</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .auth-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            padding-top: 84px;
+        }
+
+        .auth-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 440px;
+            padding: 40px;
+        }
+
+        .auth-tabs {
+            display: flex;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #ECF0F1;
+        }
+
+        .auth-tab {
+            flex: 1;
+            padding: 12px;
+            background: none;
+            border: none;
+            font-size: 16px;
+            font-weight: 600;
+            color: #7f8c8d;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .auth-tab.active {
+            color: #2C3E50;
+            border-bottom-color: #3498DB;
+        }
+
+        .auth-form {
+            display: none;
+        }
+
+        .auth-form.active {
+            display: block;
+        }
+
+        .password-toggle {
+            position: relative;
+        }
+
+        .password-toggle-btn {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        .password-strength {
+            margin-top: 8px;
+            font-size: 12px;
+        }
+
+        .strength-weak {
+            color: #E74C3C;
+        }
+
+        .strength-medium {
+            color: #F39C12;
+        }
+
+        .strength-strong {
+            color: #27AE60;
+        }
+
+        @media (max-width: 767px) {
+            .auth-card {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="navbar-content">
+            <a href="index.html" class="logo">🍃 Fresh Pro Tracker</a>
+        </div>
+    </nav>
+
+    <!-- Authentication Container -->
+    <div class="auth-container">
+        <div class="auth-card">
+            <h1 class="text-center">Welcome</h1>
+
+            <!-- Tabs -->
+            <div class="auth-tabs">
+                <button class="auth-tab active" onclick="switchTab('login')">Login</button>
+                <button class="auth-tab" onclick="switchTab('signup')">Signup</button>
+            </div>
+
+            <!-- Error/Success Messages -->
+            <div id="message-area"></div>
+
+            <!-- Login Form -->
+            <form id="login-form" class="auth-form active">
+                <div class="form-group">
+                    <label class="form-label">User Type *</label>
+                    <select id="login-usertype" class="form-select" onchange="toggleShopField()" required>
+                        <option value="">Select User Type</option>
+                        <option value="hr">HR Personnel</option>
+                        <option value="marketer">Field Marketer</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Username *</label>
+                    <input type="text" id="login-username" class="form-input" placeholder="Enter username" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Password *</label>
+                    <div class="password-toggle">
+                        <input type="password" id="login-password" class="form-input" placeholder="Enter password"
+                            required>
+                        <button type="button" class="password-toggle-btn"
+                            onclick="togglePassword('login-password')">👁️</button>
+                    </div>
+                </div>
+
+                <div class="form-group hidden" id="shop-field">
+                    <label class="form-label">Select Shop *</label>
+                    <select id="login-shop" class="form-select">
+                        <option value="">Loading shops...</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Login</button>
+            </form>
+
+            <!-- Signup Form -->
+            <form id="signup-form" class="auth-form">
+                <div class="alert alert-info">
+                    HR Personnel Only - Field marketers are registered by HR
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Full Name *</label>
+                    <input type="text" id="signup-fullname" class="form-input" placeholder="Enter full name" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Username *</label>
+                    <input type="text" id="signup-username" class="form-input"
+                        placeholder="Choose username (min 4 characters)" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Password *</label>
+                    <div class="password-toggle">
+                        <input type="password" id="signup-password" class="form-input"
+                            placeholder="Create password (min 6 characters)" required oninput="checkPasswordStrength()">
+                        <button type="button" class="password-toggle-btn"
+                            onclick="togglePassword('signup-password')">👁️</button>
+                    </div>
+                    <div id="password-strength" class="password-strength"></div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Confirm Password *</label>
+                    <div class="password-toggle">
+                        <input type="password" id="signup-confirm" class="form-input" placeholder="Confirm password"
+                            required>
+                        <button type="button" class="password-toggle-btn"
+                            onclick="togglePassword('signup-confirm')">👁️</button>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-secondary" style="width: 100%;">Create HR Account</button>
+            </form>
+
+            <!-- Loading Spinner -->
+            <div id="loading-spinner" class="loading-spinner hidden"></div>
+        </div>
+    </div>
+
+    <!-- Include config first -->
+    <script src="js/config.js"></script>
+    <script src="js/auth.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HR Dashboard - Fresh Pro Tracker</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* ============================================
+           RESPONSIVE TABLE FIXES
+           ============================================ */
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+            overflow-y: visible;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .table-container table {
+            min-width: 100%;
+            width: max-content;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        .table-container::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .table-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .table-container::-webkit-scrollbar-thumb {
+            background: #27ae60;
+            border-radius: 4px;
+        }
+
+        /* ============================================
+           LOADING SPINNER
+           ============================================ */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .loading-overlay.hidden {
+            display: none;
+        }
+
+        .loading-spinner {
+            border: 4px solid #e8f5e9;
+            border-top: 4px solid #27ae60;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* ============================================
+           NOTIFICATIONS
+           ============================================ */
+        .notification {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            padding: 16px 24px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            animation: slideIn 0.3s ease-out;
+            max-width: 400px;
+        }
+
+        .notification.error {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .notification.success {
+            background: #27ae60;
+            color: white;
+        }
+
+        .notification.warning {
+            background: #f39c12;
+            color: white;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Animation for notifications sliding out */
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+        }
+
+        /* Info notification style */
+        .notification.info {
+            background: #3498db;
+            color: white;
+        }
+
+        /* Pulsing effect for active status */
+        .time-at-location {
+            font-weight: 600;
+            color: #27ae60;
+            animation: pulseText 2s ease-in-out infinite;
+        }
+
+        @keyframes pulseText {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.7;
+            }
+        }
+
+        /* Loading state for tables */
+        .table-loading {
+            position: relative;
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .table-loading::after {
+            content: "Updating...";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 10px 20px;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            font-weight: 600;
+            color: #27ae60;
+        }
+
+        /* Map markers popup */
+        .leaflet-popup-content {
+            font-family: inherit;
+            line-height: 1.6;
+        }
+
+        .leaflet-popup-content b {
+            color: #27ae60;
+            font-size: 16px;
+        }
+
+        /* Refresh button animation */
+        .btn-accent:active {
+            transform: scale(0.95);
+        }
+
+        /* Status badge animations */
+        .badge {
+            transition: all 0.3s ease;
+        }
+
+        .badge:hover {
+            transform: scale(1.05);
+        }
+
+        /* Responsive adjustments for real-time tracking */
+        @media (max-width: 768px) {
+            .time-at-location {
+                font-size: 14px;
+            }
+
+            #map {
+                height: 300px !important;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <!-- Chart.js Library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Include config first -->
+    <script src="js/config.js"></script>
+    <script src="js/hr_dash_js.js"></script>
+</head>
+
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="navbar-content">
+            <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+            <a href="#" class="logo">🍃 Fresh Pro Tracker</a>
+            <div style="display: flex; gap: 16px; align-items: center;">
+                <span style="color: white;">Welcome, HR Admin</span>
+                <a href="auth.html" class="btn btn-danger" style="padding: 8px 16px;">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Dashboard Layout -->
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <ul class="sidebar-nav">
+                <li><a href="#" class="active" onclick="showTab('overview')">📊 Dashboard Overview</a></li>
+                <li><a href="#" onclick="showTab('register-shop')">🏪 Register Shop</a></li>
+                <li><a href="#" onclick="showTab('register')">➕ Register Marketer</a></li>
+                <li><a href="#" onclick="showTab('view-all')">👥 View All Marketers</a></li>
+                <li><a href="#" onclick="showTab('tracking')">📍 Real-Time Tracking</a></li>
+                <li><a href="#" onclick="showTab('reports')">📈 Reports & Analytics</a></li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div id="current-time" style="text-align: right; color: #7f8c8d; margin-bottom: 20px;"></div>
+
+            <!-- Overview Tab -->
+            <div id="overview-tab" class="tab-content">
+                <h1>Dashboard Overview</h1>
+
+                <div class="row">
+                    <div class="col">
+                        <div class="card">
+                            <h3>Total Field Marketers</h3>
+                            <p style="font-size: 48px; font-weight: 700; color: var(--primary); margin: 20px 0;">--</p>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="card">
+                            <h3>Currently Logged In</h3>
+                            <p style="font-size: 48px; font-weight: 700; color: var(--secondary); margin: 20px 0;">--
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2 class="card-header">Recent Activity</h2>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Time</th>
+                                    <th>Marketer</th>
+                                    <th>Action</th>
+                                    <th>Location</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="4" style="text-align: center;">Loading...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Register Shop Tab -->
+            <div id="register-shop-tab" class="tab-content hidden">
+                <h1>Register New Shop</h1>
+
+                <div class="card">
+                    <form id="register-shop-form">
+                        <div class="form-group">
+                            <label class="form-label">Shop Name *</label>
+                            <input type="text" id="shop-name" class="form-input" placeholder="e.g., OK Mart - Harare"
+                                required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Shop Address *</label>
+                            <textarea id="shop-address" class="form-input" rows="3"
+                                placeholder="e.g., 123 Samora Machel Ave, Harare" required></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-secondary">Register Shop</button>
+                    </form>
+                </div>
+
+                <!-- List of existing shops -->
+                <div class="card" style="margin-top: 30px;">
+                    <h3>Existing Shops</h3>
+                    <div class="table-container">
+                        <table id="shops-list-table">
+                            <thead>
+                                <tr>
+                                    <th>Shop ID</th>
+                                    <th>Shop Name</th>
+                                    <th>Address</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="3" style="text-align: center;">Loading...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Register Marketer Tab -->
+            <div id="register-tab" class="tab-content hidden">
+                <h1>Register Field Marketer</h1>
+
+                <div class="card">
+                    <form id="register-form">
+                        <div class="form-group">
+                            <label class="form-label">Full Name *</label>
+                            <input type="text" id="marketer-fullname" class="form-input" placeholder="Enter full name"
+                                required>
+                            <small style="color: #7f8c8d;">Letters, numbers, and underscore only (min 4
+                                characters)</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Username *</label>
+                            <input type="text" id="marketer-username" class="form-input" placeholder="Create username"
+                                required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Password *</label>
+                            <input type="password" id="marketer-password" class="form-input"
+                                placeholder="Create password (min 6 characters)" minlength="6" required>
+                            <small style="color: #7f8c8d;">Minimum 6 characters</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Assigned Shop *</label>
+                            <select id="marketer-shop" class="form-select" required>
+                                <option value="">Loading shops...</option>
+                            </select>
+                            <small style="color: #7f8c8d;">
+                                If No shops available?
+                                <a href="#" onclick="showTab('register-shop'); return false;" style="color: #27ae60;">
+                                    Register a shop first
+                                </a>
+                            </small>
+                        </div>
+
+                        <button type="submit" class="btn btn-secondary">Register Marketer</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- View All Marketers Tab -->
+            <div id="view-all-tab" class="tab-content hidden">
+                <h1>All Field Marketers</h1>
+
+                <div class="card">
+                    <div class="table-container">
+                        <table id="marketers-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Assigned Shop</th>
+                                    <th>Status</th>
+                                    <th>Last Login</th>
+                                    <th>Hours Today</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="6" style="text-align: center;">Loading...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Real-Time Tracking Tab -->
+            <div id="tracking-tab" class="tab-content hidden">
+                <h1>Real-Time Tracking</h1>
+
+                <div class="row">
+                    <div class="col" style="min-width: 100%;">
+                        <div class="card">
+                            <div
+                                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                                <h3>Live Location Map</h3>
+                                <button class="btn btn-accent" onclick="refreshMap()">🔄 Refresh</button>
+                            </div>
+                            <div id="map" style="height: 400px; border-radius: 8px;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>Active Marketers</h3>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Shop Location</th>
+                                    <th>GPS Coordinates</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="4" style="text-align: center;">Loading...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reports & Analytics Tab -->
+            <div id="reports-tab" class="tab-content hidden">
+                <h1>Reports & Analytics</h1>
+
+                <div class="card">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <h3>Hours Worked (This Week)</h3>
+                        <button class="btn btn-accent" onclick="loadAttendanceLogs()"
+                            style="padding: 6px 12px; font-size: 14px;">
+                            🔄 Refresh Data
+                        </button>
+                    </div>
+                    <div style="position: relative; height: 350px; margin: 20px 0;">
+                        <canvas id="hoursChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>Detailed Attendance Logs</h3>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Marketer</th>
+                                    <th>Shop</th>
+                                    <th>Login Time</th>
+                                    <th>Logout Time</th>
+                                    <th>Login GPS</th>
+                                    <th>Logout GPS</th>
+                                    <th>Hours Worked</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="8" style="text-align: center;">Loading...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+</body>
+
+</html>
